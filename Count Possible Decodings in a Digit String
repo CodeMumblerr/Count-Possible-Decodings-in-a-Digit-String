@@ -1,0 +1,66 @@
+# Program to count and show all decoding ways of a digit string
+# using recursion with memoization
+
+# Mapping from digit to character
+def getChar(num):
+    return chr(ord('A') + num - 1)
+
+# Helper function to count decoding ways
+def countDecodingsHelper(s, index, memo):
+    if index >= len(s):
+        return 1
+    if s[index] == '0':
+        return 0
+    if memo[index] != -1:
+        return memo[index]
+
+    count = countDecodingsHelper(s, index + 1, memo)
+
+    if index + 1 < len(s) and (s[index] == '1' or (s[index] == '2' and s[index + 1] <= '6')):
+        count += countDecodingsHelper(s, index + 2, memo)
+
+    memo[index] = count
+    return count
+
+# Helper function to find all decoded combinations
+def findDecodingCombinations(s, index, path, result):
+    if index == len(s):
+        result.append("".join(path))
+        return
+    if s[index] == '0':
+        return
+
+    # Single-digit character
+    path.append(getChar(int(s[index])))
+    findDecodingCombinations(s, index + 1, path, result)
+    path.pop()
+
+    # Two-digit character
+    if index + 1 < len(s):
+        num = int(s[index:index + 2])
+        if 10 <= num <= 26:
+            path.append(getChar(num))
+            findDecodingCombinations(s, index + 2, path, result)
+            path.pop()
+
+# Main function
+def decodeMessage(digits):
+    if not digits:
+        return 0, []
+
+    memo = [-1] * len(digits)
+    count = countDecodingsHelper(digits, 0, memo)
+
+    decoded_combinations = []
+    findDecodingCombinations(digits, 0, [], decoded_combinations)
+
+    return count, decoded_combinations
+
+if __name__ == "__main__":
+    digit_string = "123"
+    total_ways, combinations = decodeMessage(digit_string)
+
+    print(f"Total decoding ways for '{digit_string}': {total_ways}")
+    print("Possible decodings:")
+    for combo in combinations:
+        print(combo)
